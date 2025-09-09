@@ -1,0 +1,13 @@
+{
+  "name": "Dart Codespace",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dart-code.dart-code"
+      ]
+    }
+  }
+}
