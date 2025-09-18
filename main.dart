@@ -1,152 +1,97 @@
-
+// Import the library for standard input/output
 import 'dart:io';
-import 'dart:math';
 
-// black jack
-
-void main () {
-
-  List cards = <int> [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 15, 15];
-
-
-  int drawCard() {
-    Random rand = Random();
-    int choice = rand.nextInt(cards.length);
-    int c = cards[choice];
-    cards.removeAt(choice);
-    return c;
-  }
-
-  void checkJoker(int carda, int cardb){
-  if(carda == 15 || cardb == 15){
-    print("omg!! u got a joker! if your next card is an even number, you win. If not, YOU LOSE......");
-    stdout.write("ready to pick, type any key.");
-    stdin.readLineSync()!;
-
-    int nextCard = cards[Random().nextInt(cards.length)];
-
-    print("congrats you got a $nextCard");
-    if(nextCard%2 == 0){
-      gameOver('w');
-    }
-    else{
-      gameOver('l');
-    } 
-    }
-  }
-
-  int card1 = drawCard();
-  int card2 = drawCard();
-
- 
-  int card3 = drawCard();
-  int card4 = drawCard();
-
-  checkJoker(card1, card3);
-  checkJoker(card2, card4);
-
-  int playVal = card1 + card3;
-  int dealVal = card2 + card4;
-
-  List dealer = <int> [card2, card4];
-  List player = <int> [card1, card3];
-
-  if (playVal == 22) {
-    playVal = 12;
-    card2 = 1;
-  }
-
-  print("Your hand is currently $player which is $playVal and the dealer is currently showing a $card4");
-
-  stdout.write("would you like to hit, stand or double down(double)? ");
-  var act = stdin.readLineSync()!;
-
-  while ((act == 'double') || (act == 'hit')) {
-    int choice = drawCard();
-    if (choice == 15) {
-      while (choice == 15) {
-        choice = drawCard();
-      }
-    }
-    player.add(choice);
-    int pick = choice;
-    playVal += pick;
-    print("you drew a $pick you now have $playVal");
-    checkBust(playVal);
-    if (act == 'double'){
-      dealerTurn(dealer, dealVal, player, playVal, cards);
-    }
-    stdout.write("would you like to hit or stand? ");
-    act = stdin.readLineSync()!;
-  }
-
-  dealerTurn(dealer, dealVal, player, playVal, cards);
+// A function to print the current state of the board
+void printGameBoard(List<String> board) {
+  print(' ${board[0]} | ${board[1]} | ${board[2]} ');
+  print(' --- --- ----');
+  print(' ${board[3]} | ${board[4]} | ${board[5]} ');
+  print(' --- --- ----');
+  print(' ${board[6]} | ${board[7]} | ${board[8]} ');
 }
 
-void gameOver (String outCome) {
+bool playerTurn(String currentPlayer, List<String> board) {
+  print("Player $currentPlayer, enter your move (e.g. a1, b2):");
+  String? move = stdin.readLineSync();
 
-  switch(outCome) {
-
-    case('w'):
-    print("congratulations you win and double your ! 🎉🥳🎉🥳");
-    break;
-    case('l'):
-    print("you suck and you lost all your money your house your car and custody over your children LLLLLLLLLLLLL \n tough luck gg nt but come back we miss you 😞");
-    break;
-    case('bj'):
-    print("you are the luckiest player ever you win 3 to 2 times your bet \nyou should spend all your money to win the billion dollar powerball lottery ✧｡٩(ˊᗜˋ )و✧*｡");
-    break;
-    case('p'):
-    print('you pushed and tied the dealer ¯\_(ツ)_/¯');
-    break;
+  if (move == null || !board.contains(move)) {
+    print("Invalid move, try again.");
+    return false; // move failed
   }
 
-  exit(0);
+  // Replace with player's symbol
+  int index = board.indexOf(move);
+  board[index] = currentPlayer;
 
+  printGameBoard(board);
+  return true; // move worked
 }
 
+//function which checks if there is a winner
+bool checkWin(List spots) {
+  //get X positions
+  Set<int> posX =
+      {}; //sets are diff bc order doesnt matter, duplicates dont count, we j want to know if the positions are in the list of wins
+  Set<int> posO = {};
+  List wins = [
+    {0, 1, 2},
+    {3, 4, 5},
+    {6, 7, 8},
+    {0, 3, 6},
+    {1, 4, 7},
+    {2, 5, 8},
+    {0, 4, 8},
+    {2, 4, 6},
+  ];
 
-void dealerTurn (List dealHand, int dealVal, List playHand, int playVal, List cards) {
-
-  print("the dealer has $dealHand which is $dealVal");
-
-  if (dealVal < 17) {
-    while (dealVal < 17){
-      int hit = Random().nextInt(cards.length);
-      int choice = cards[hit];
-      while (choice == 15) {
-          int hit = Random().nextInt(cards.length);
-          choice = cards[hit];
-      }
-      dealHand.add(choice);
-      dealVal += choice;
-      print("the dealer picked a $choice their hand is now $dealHand they now have $dealVal");
-      cards.remove(hit);
-    } 
+  for (int i = 0; i < 9; i++) {
+    if (spots[i] == 'X') {
+      posX.add(i);
+    } else if (spots[i] == 'O') {
+      posO.add(i);
+    }
   }
 
-  if (dealVal > 21) {
-    print("dealer busted");
-    gameOver('w');
-  } else if (dealVal == 21) {
-    print("dealer has 21");
+  for (Set<int> combo in wins) {
+    //for each of the possible win conditions
+    if (posX.containsAll(combo) || posO.containsAll(combo)) {
+      //if all nums in List wins are included in posX
+      return true;
+    }
   }
-  if (dealVal > playVal) {
-    gameOver('l');
-  } else if (dealVal == playVal) {
-    gameOver('p');
-  } else {
-    gameOver('w');
-  }
-  
+  return false;
 }
 
-void checkBust (playVal) {
-  if (playVal > 21) {
-    print("you busted");
-    gameOver('l');
+void main() {
+
+  // The list to represent the game board
+  List<String> gameBoard = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3'];
+
+  printGameBoard(gameBoard);
+  String currentPlayer = 'X';
+  int moves = 0;
+
+  while (true) {
+    bool moveMade = playerTurn(currentPlayer, gameBoard);
+
+    if (!moveMade) continue; // ask again if invalid
+    moves++;
+
+    if (checkWin(gameBoard)) {
+      print("Player $currentPlayer wins!");
+      break;
+    }
+
+    if (moves == 9) {
+      print("It's a draw!");
+      break;
+    }
+
+    // Switch players
+    if (currentPlayer == 'X') {
+      currentPlayer = 'O';
+    } else {
+      currentPlayer = 'X';
+    }
   }
-  return;
 }
-
-
