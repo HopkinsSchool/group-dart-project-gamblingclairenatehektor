@@ -2,12 +2,23 @@
 import 'dart:io';
 
 // A function to print the current state of the board
-void printGameBoard(List<String> board) {
-  print(' ${board[0]} | ${board[1]} | ${board[2]} ');
-  print(' --- --- ----');
-  print(' ${board[3]} | ${board[4]} | ${board[5]} ');
-  print(' --- --- ----');
-  print(' ${board[6]} | ${board[7]} | ${board[8]} ');
+void makeBoard (List count) {
+  int j = 0;
+
+  for (String i in count) {
+    j += 1;
+    stdout.write('$i | ');
+    if ((j==3) || (j==6) || (j==9)) {
+      print('');
+      switch (j){
+        case(9):
+        break;
+        default:
+        print('----+----+----');
+        break;
+      }
+    }
+  }
 }
 
 bool playerTurn(String currentPlayer, List<String> board) {
@@ -23,7 +34,7 @@ bool playerTurn(String currentPlayer, List<String> board) {
   int index = board.indexOf(move);
   board[index] = currentPlayer;
 
-  printGameBoard(board);
+  makeBoard(board);
   return true; // move worked
 }
 
@@ -67,7 +78,7 @@ void main() {
   // The list to represent the game board
   List<String> gameBoard = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3'];
 
-  printGameBoard(gameBoard);
+  makeBoard(gameBoard);
   String currentPlayer = 'X';
   int moves = 0;
 
